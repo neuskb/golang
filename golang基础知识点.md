@@ -67,3 +67,35 @@
     哈希，无序
 ```
 11. grpc使用场景
+
+12. slice扩容机制
+* 如果切片的容量小于1024个元素，那么扩容的时候slice的cap就翻番，乘以2；一旦元素个数超过1024个元素，增长因子就变成1.25，即每次增加原来容量的四分之一。
+* 如果扩容之后，还没有触及原数组的容量，那么，切片中的指针指向的位置，就还是原数组，如果扩容之后，超过了原数组的容量，那么，Go就会开辟一块新的内存，把原来的值拷贝过来，这种情况丝毫不会影响到原数组。
+
+13. panic是如何执行的
+
+panic执行时，先取当前协程结构G，G中保存defer列表和panic列表，循环执行defer列表的函数，这意味着所有和协程有关的defer都会执行，包括调用链上层函数的defer，全部defer执行完后，打印调用栈结束程序。
+
+14. sync.WaitGroup作用
+
+等待一个系列执行完成后才会继续向下执行
+
+15. sync.RWMutex和sync.Mutex区别
+
+golang中sync包实现了两种锁Mutex （互斥锁）和RWMutex（读写锁），其中RWMutex是基于Mutex实现的，只读锁的实现使用类似引用计数器的功能．
+```
+    type Mutex
+        func (m *Mutex) Lock()
+        func (m *Mutex) Unlock()
+    type RWMutex
+        func (rw *RWMutex) Lock()
+        func (rw *RWMutex) RLock()
+        func (rw *RWMutex) RLocker() Locker
+        func (rw *RWMutex) RUnlock()
+
+        func (rw *RWMutex) Unlock()
+```
+* 其中Mutex为互斥锁，Lock()加锁，Unlock()解锁，使用Lock()加锁后，便不能再次对其进行加锁，直到利用Unlock()解锁对其解锁后，才能再次加锁．适用于读写不确定场景，即读写次数没有明显的区别，并且只允许只有一个读或者写的场景，所以该锁叶叫做全局锁.
+* RWMutex是一个读写锁，该锁可以加多个读锁或者一个写锁，其经常用于读次数远远多于写次数的场景．func (rw *RWMutex) Lock()写锁，如果在添加写锁之前已经有其他的读锁和写锁，则lock就会阻塞直到该锁可用，为确保该锁最终可用，已阻塞的 Lock 调用会从获得的锁中排除新的读取器，即写锁权限高于读锁，有写锁时优先进行写锁定.
+
+

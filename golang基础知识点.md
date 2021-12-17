@@ -98,4 +98,33 @@ golang中sync包实现了两种锁Mutex （互斥锁）和RWMutex（读写锁）
 * 其中Mutex为互斥锁，Lock()加锁，Unlock()解锁，使用Lock()加锁后，便不能再次对其进行加锁，直到利用Unlock()解锁对其解锁后，才能再次加锁．适用于读写不确定场景，即读写次数没有明显的区别，并且只允许只有一个读或者写的场景，所以该锁叶叫做全局锁.
 * RWMutex是一个读写锁，该锁可以加多个读锁或者一个写锁，其经常用于读次数远远多于写次数的场景．func (rw *RWMutex) Lock()写锁，如果在添加写锁之前已经有其他的读锁和写锁，则lock就会阻塞直到该锁可用，为确保该锁最终可用，已阻塞的 Lock 调用会从获得的锁中排除新的读取器，即写锁权限高于读锁，有写锁时优先进行写锁定.
 
+16. 结构体匿名字段
+```
+package main
+ 
+import (
+	"fmt"
+)
+ 
+type A struct {
+	B
+	m int
+}
+ 
+type B struct {
+	n int
+}
+ 
+func (b *B) my_print() {
+	fmt.Printf("print B.n=%d\n", b.n)
+}
+ 
+func main() {
+	a := &A{B{2}, 3}
+	fmt.Printf("A.n=%d, A.m=%d\n", a.n, a.m)
+	a.my_print()
+}
+```
+B是结构体A的匿名字段；所以B的成员n对于结构体A来说相当于是A自己的成员变量a.n，而且，B的方法也是A的方法, a.my_print()。
+
 
